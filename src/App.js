@@ -10,7 +10,9 @@ import  Cryptocurrencies  from './components/Cryptocurrencies';
 import  Cryptodetails  from './components/Cryptodetails';
 import  Exchanges  from './components/Exchanges';
 import  News  from './components/News';
+import { useState } from 'react';
 import "./app.css"
+
 const App = () => {
   return (
     <div className='app'>
