@@ -1,13 +1,19 @@
-import {React,useState} from 'react'
+import {React,useEffect,useState} from 'react'
 import {useGetCryptosNewsQuery} from "../services/newsApi";
 import { useGetCryptosQuery } from '../services/cryptoApi';
 import {Row,Col,Card,Typography, Avatar,Select,Skeleton} from "antd";
 import moment from "moment";
+import newsapi from '../services/newsapi1';
 
 const News = ({status,category}) => {
   const [Category,setCategory]=useState(category);
   console.log(Category);
   let count=0;
+
+  useEffect(()=>{
+    setdata([]);
+    newsappicall();
+  },[])
 
 if(status==true){
   count=6;
@@ -15,12 +21,17 @@ if(status==true){
 else{
   count=50;
 }
-  const {data}=useGetCryptosNewsQuery({count:count,categories:Category});
+const [data,setdata]=useState([]);
+  const newsappicall= async () =>{
+    const datanews=await newsapi.newscalling(Category,count);
+    setdata(datanews.data.news)
+    console.log(datanews)
+  }
 
   const {data:cryptocoin}=useGetCryptosQuery(20);
   console.log(cryptocoin?.data?.coins)
   const demo="https://media.istockphoto.com/id/1326770854/photo/cryptocurrency-on-binance-trading-app-bitcoin-btc-with-altcoin-digital-coin-crypto-currency.jpg?s=612x612&w=0&k=20&c=zDTdAkqrP7Er1MM2r25GNrTN7jygE-NzSgsVwWsnLKM="
-  console.log(data);
+  // console.log(datanews);
   const {Option} =Select;
   return (
     <Row gutter={[24,24]}>
@@ -41,9 +52,9 @@ else{
       </Col>: ""
 }
    { 
-   (data!==undefined) ?
+   (data?.length !== 0) ?
    <>
-   {data.value.map((value)=>
+   {data?.map((value)=>
    {
      return(
       <Col xs={24} sm={12} lg={8}>
@@ -52,24 +63,23 @@ else{
           <div className="news-image-container">
             <Typography.Title className='news-title' level={5}>
             {
-              <span>{(value.name.length>40)?`${value.name.substring(0,40)}....`:`${value.name}`}</span>
+              <span>{(value.title.length>40)?`${value.title.substring(0,40)}....`:`${value.title}`}</span>
             }
-            </Typography.Title>
-            <img alt="news" className="imageooff" src={`${value?.image?.thumbnail?.contentUrl || demo}`}/>
+            </Typography.Title> 
+            <img alt="news" className="imageooff" src={`${value?.image || demo}`}/>
           </div>
           <p className="para" style={{fontsize:"1vw"}}>
             {
-              <span>{(value.description.length>100)?`${value.description.substring(0,100)}....`:`${value.description}`}</span>
+              <span>{(value.body.length>100)?`${value.body.substring(0,100)}....`:`${value.body}`}</span>
             }
           </p>
           <br></br>
           <div className="provider-container">
             <div>
-              <Avatar src={value.provider[0]?.image?.thumbnail?.contentUrl || demo} className='avatar'></Avatar>
-              <Typography.Text className='provider-name'>{value.provider[0]?.name}</Typography.Text>
+              <Typography.Text className='provider-name'>{value.source}</Typography.Text>
             </div>
             <Typography.Text>
-              <span>{moment(value.datePublished).startOf("ss").fromNow()}</span>
+              <span>{moment(value.date).startOf("ss").fromNow()}</span>
               </Typography.Text>
           </div>
       </a>
@@ -79,7 +89,7 @@ else{
     })
   }
   </> : <><Skeleton active className='skelthon1' /><Skeleton active className='skelthon1' /><Skeleton active className='skelthon1' /></>
-  }
+  } 
   </Row>
   )
 }
